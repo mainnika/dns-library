@@ -111,8 +111,8 @@ public final class Dns {
     public short getId() {
         return id;
     }
-    public Dns setId(short id) {
-        this.id = id;
+    public Dns setId(int id) {
+        this.id = (short)id;
         return this;
     }
     
@@ -243,9 +243,9 @@ public final class Dns {
     }
     
     /* Добавить стандартный Query в пакет */
-    public Dns addQuery(String query, short qType, short qClass) throws DnsException{
+    public Dns addQuery(String query, int qType, int qClass) throws DnsException{
         Dns.Query q = new Dns.Query();
-        q.setQuery(query).setCl(qClass).setType(qType);
+        q.setQuery(query).setCl((short)qClass).setType((short)qType);
         queries.add(q);
         qdcount++;
         return this;
@@ -280,7 +280,14 @@ public final class Dns {
     // TODO public Answer getAnswerAt(int index) throws DnsException
     
     // TODO public short getAnswersSize()
-
+    public short getAnswersSize(){
+        short ret = 0;
+        for (Dns.Answer answer : answers)
+            ret+=answer.getSize();
+        return ret;
+    }
+    
+    
     // TODO public Dns addAuthority(Authority auth)
     
     // TODO public Dns addAuthority(Name name, short aClass, int aTtl, Name addData)
@@ -303,12 +310,25 @@ public final class Dns {
         if (offset<12)
             return null;//TODO Exception 
         
-        if (offset<(getQueriesSize()+12))
+        short qz = getQueriesSize();
+        
+        if (offset<(qz+12))
             for (Dns.Query query : queries)
                 for (Dns.Data.Name name : query.names)
                     if (offset==name.getOffset())
                         return name;
         
+        short az = getAnswersSize();
+        
+        if (offset<(12+qz+az))
+            for (Dns.Answer answer : answers){
+                for (Dns.Data.Name name : answer.names)
+                    if (offset == name.getOffset())
+                        return name;
+                for (Dns.Data.Name name : answer.datas)
+                    if (offset == name.getOffset())
+                        return name;
+            }
         
         return null;
         // TODO Add other datas;
