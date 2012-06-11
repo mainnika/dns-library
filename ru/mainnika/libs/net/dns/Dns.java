@@ -277,7 +277,13 @@ public final class Dns {
     
     // TODO public Dns addAnswer(Name name, short aType, short aClass, int aTtl, Name addData)
     
-    // TODO public Answer getAnswerAt(int index) throws DnsException
+    public Answer getAnswerAt(int index) throws DnsException {
+        if (answers.size()<index){
+            throw new DnsException("Only "+Integer.toString(queries.size())+" contains");
+        }else{
+            return answers.get(index);
+        }
+    }
     
     // TODO public short getAnswersSize()
 
